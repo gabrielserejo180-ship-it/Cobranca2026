@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GTS Soluções — Cobrança WhatsApp</title>
+<style>
+:root{--bg:#f4f6fa;--sf:#fff;--tx:#14213d;--mu:#667085;--bd:#dfe3ea;--bl:#1d4ed8;--bl2:#e8effe;--rd:#d62828;--rd2:#fdecec;--nav:#0f2a6b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1424;--sf:#161e33;--tx:#e8ecf5;--mu:#9aa6bf;--bd:#2a3550;--bl:#6b94ff;--bl2:#1b2a52;--rd:#ff6b6b;--rd2:#3a1c22;--nav:#0a1633}}
+:root[data-theme="dark"]{--bg:#0e1424;--sf:#161e33;--tx:#e8ecf5;--mu:#9aa6bf;--bd:#2a3550;--bl:#6b94ff;--bl2:#1b2a52;--rd:#ff6b6b;--rd2:#3a1c22;--nav:#0a1633}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%;margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}
+.app{display:flex;flex-direction:column;height:100%}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;background:var(--nav);color:#fff;border-bottom:3px solid var(--rd)}
+.brand b{font-size:18px;letter-spacing:.3px}.brand small{display:block;font-size:11px;opacity:.75}
+.emp{background:#ffffff1f;border:1px solid #ffffff40;color:#fff;border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;max-width:50%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wrap{flex:1;display:flex;min-height:0}
+nav{width:230px;background:var(--sf);border-right:1px solid var(--bd);overflow:auto;padding:8px;flex:none}
+nav button{display:flex;width:100%;gap:8px;align-items:center;text-align:left;background:none;border:0;color:var(--tx);padding:9px 10px;border-radius:8px;cursor:pointer;font:inherit}
+nav button.on{background:var(--bl2);color:var(--bl);font-weight:600}
+nav i{font-style:normal;font-size:11px;color:var(--mu);margin-left:auto}
+main{flex:1;overflow:auto;padding:16px;min-width:0}
+h2{margin:0 0 12px;font-size:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px}
+.card .n{font-size:26px;font-weight:700;color:var(--bl)}.card .l{font-size:12px;color:var(--mu)}
+.card.al .n{color:var(--rd)}
+label{display:block;font-size:13px;color:var(--mu);margin:10px 0 4px}
+input{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+.btn{background:var(--rd);color:#fff;border:0;border-radius:8px;padding:9px 14px;cursor:pointer;font:inherit}
+.btn.s{background:var(--bl2);color:var(--bl)}
+.btn:disabled{opacity:.45;cursor:default}
+.bar{display:flex;gap:6px;margin-bottom:8px}.bar input{flex:1}
+.note{background:var(--rd2);border-left:3px solid var(--rd);padding:8px 10px;border-radius:6px;font-size:13px;margin:8px 0}
+iframe{width:100%;height:60vh;border:1px solid var(--bd);border-radius:8px;background:#fff}
+.tag{display:inline-block;font-size:12px;background:var(--bl2);color:var(--bl);padding:2px 8px;border-radius:99px}
+#toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:9px 14px;border-radius:8px;display:none;z-index:9;max-width:90%}
+@media(max-width:700px){.wrap{flex-direction:column}nav{width:100%;display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid var(--bd);padding:6px}nav button{width:auto;white-space:nowrap}nav i{display:none}}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:6px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}.tw{overflow-x:auto}td input{min-width:120px}textarea,select{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f2a6b">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand"><b>GTS Soluções</b><small>GS Tech Solutions · Cobrança automatizada</small></div>
+  <button class="emp" id="emp" title="Alterar nome da empresa"></button>
+</header>
+<div class="wrap"><nav id="nav"></nav><main id="main"></main></div>
+</div>
+<div id="toast"></div>
+<script>
+const MODS=[["painel","Painel principal",1],["importar","Importação de fichas",2],["ident","Clientes identificados",2],["incons","Clientes com inconsistências",2],["dest","Seleção de destinatários",3],["modelos","Modelos de mensagens",3],["nav","Navegador interno",1],["wa","WhatsApp Web",4],["fila","Fila de envios",3],["hist","Histórico de cobranças",3],["conf","Configurações",1],["backup","Backup e armazenamento",5]];
+const STORES=["config","clients","templates","history","campaigns","pdfs"];
+let db=null,dbErr=null,empresa="",cur="painel";
+const $=s=>document.querySelector(s);
+function toast(t){const e=$("#toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",3200)}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function openDB(){return new Promise((ok,no)=>{if(!window.indexedDB)return no(new Error("IndexedDB indisponível neste navegador"));const r=indexedDB.open("gts-cobranca",1);r.onupgradeneeded=()=>{STORES.forEach(s=>r.result.createObjectStore(s,s==="config"?{keyPath:"id"}:{keyPath:"id",autoIncrement:true}))};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}
+function rq(s,m,...a){return new Promise((ok,no)=>{try{const q=db.transaction(s,/get|count/.test(m)?"readonly":"readwrite").objectStore(s)[m](...a);q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error)}catch(e){no(e)}})}
+function drawNav(){$("#nav").innerHTML=MODS.map(m=>`<button data-k="${m[0]}" class="${m[0]===cur?"on":""}">${m[1]}${m[2]>1?`<i>Etapa ${m[2]}</i>`:""}</button>`).join("");$("#nav").querySelectorAll("button").forEach(b=>b.onclick=()=>{cur=b.dataset.k;show()})}
+function drawEmp(){$("#emp").textContent="Empresa: "+(empresa||"não informada — clique para definir")}
+$("#emp").onclick=()=>{cur="conf";show()};
+async function painel(){
+  let c=[],h=[],camp=0;
+  if(db){try{c=await rq("clients","getAll");h=await rq("history","getAll");camp=await rq("campaigns","count")}catch(e){toast("Erro ao ler o armazenamento: "+e.message)}}
+  const k=[["Clientes importados",c.length],["Clientes identificados",c.filter(x=>x.status==="ok").length],["Com inconsistências",c.filter(x=>x.status==="inconsistente").length,1],["Selecionados",c.filter(x=>x.selecionado).length],["Mensagens enviadas",h.filter(x=>x.status==="Enviado").length],["Mensagens com falha",h.filter(x=>x.status==="Falha").length,1],["Campanhas realizadas",camp]];
+  return `<h2>Painel principal</h2>${dbErr?`<div class="note">Armazenamento local indisponível: ${esc(dbErr)}</div>`:""}<div class="grid">${k.map(x=>`<div class="card ${x[2]?"al":""}"><div class="n">${x[1]}</div><div class="l">${x[0]}</div></div>`).join("")}</div><p class="note" style="background:var(--bl2);border-color:var(--bl)">Os números vêm dos registros salvos neste navegador. Ainda não há importação (Etapa 2), por isso tudo começa em zero.</p>`}
+function conf(){return `<h2>Configurações</h2><div class="card"><label for="ne">Nome da empresa usuária</label><input id="ne" value="${esc(empresa)}" maxlength="80" placeholder="Ex.: Alvorada Motocicletas"><p style="margin:10px 0 0"><button class="btn" id="sv">Salvar</button></p><p class="l" style="color:var(--mu);font-size:12px">Salvo localmente (IndexedDB) e exibido no cabeçalho. A marca GTS Soluções permanece fixa.</p></div>`}
+function bind_conf(){$("#sv").onclick=async()=>{const v=$("#ne").value.trim();if(!v)return toast("Informe o nome da empresa.");if(!db)return toast("Não foi possível salvar: armazenamento local indisponível.");try{await rq("config","put",{id:"empresa",valor:v});empresa=v;drawEmp();toast("Nome da empresa salvo.")}catch(e){toast("Falha ao salvar: "+e.message)}}}
+const H={hist:[],i:-1};
+function navi(){return `<h2>Navegador interno</h2>${cseBox()}<div class="bar"><button class="btn s" id="b1">←</button><button class="btn s" id="b2">→</button><button class="btn s" id="b3">⟳</button><input id="u" placeholder="Endereço ou pesquisa no Google"><button class="btn" id="go">Ir</button><button class="btn s" id="ex">Abrir fora</button></div><div class="note">Muitos sites (incluindo Google e WhatsApp Web) bloqueiam a exibição dentro de outra página. O sistema não consegue detectar esse bloqueio; se a área ficar vazia, use “Abrir fora”.</div><iframe id="fr" sandbox="allow-scripts allow-forms allow-same-origin allow-popups" title="Navegador interno"></iframe>`}
+function toUrl(t){t=t.trim();if(!t)return null;if(/^https?:\/\//i.test(t))return t;if(/^[a-z][a-z0-9+.-]*:/i.test(t)&&!/^[\w.-]+:\d+/.test(t))return null;if(/^[\w-]+(\.[\w-]+)+(\/.*)?$/.test(t))return "https://"+t;return "https://www.google.com/search?q="+encodeURIComponent(t)}
+function bind_nav(){
+  const fr=$("#fr"),u=$("#u");
+  const load=()=>{const x=H.hist[H.i];if(x){u.value=x;fr.src=x}$("#b1").disabled=H.i<=0;$("#b2").disabled=H.i>=H.hist.length-1};
+  const go=()=>{const x=toUrl(u.value);if(!x)return toast("Endereço inválido. Use http:// ou https://.");H.hist=H.hist.slice(0,H.i+1);H.hist.push(x);H.i++;load()};
+  $("#go").onclick=go;u.onkeydown=e=>{if(e.key==="Enter")go()};
+  $("#b1").onclick=()=>{if(H.i>0){H.i--;load()}};$("#b2").onclick=()=>{if(H.i<H.hist.length-1){H.i++;load()}};
+  $("#b3").onclick=()=>{if(H.hist[H.i])fr.src=H.hist[H.i]};
+  $("#ex").onclick=()=>{const x=H.hist[H.i]||toUrl(u.value);x?window.open(x,"_blank","noopener"):toast("Digite um endereço primeiro.")};
+  load();
+}
+function pend(m){return `<h2>${m[1]}</h2><div class="card"><span class="tag">Etapa ${m[2]}</span><p>Módulo ainda não implementado. Será desenvolvido na Etapa ${m[2]} do plano; nenhum recurso desta tela funciona por enquanto.</p></div>`}
+const WURL="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+function normTel(s){let d=(s||"").replace(/\D/g,"");if(d.startsWith("55")&&d.length>=12)d=d.slice(2);return d.replace(/^0+/,"")}
+function telOk(d){return(d.length===10||d.length===11)&&+d.slice(0,2)>=11&&(d.length===10||d[2]==="9")}
+async function pageLines(p){const t=await p.getTextContent(),L={};t.items.forEach(i=>{const y=Math.round(i.transform[5]/3);(L[y]=L[y]||[]).push([i.transform[4],i.str])});return Object.keys(L).sort((a,b)=>b-a).map(y=>L[y].sort((a,b)=>a[0]-b[0]).map(x=>x[1]).join(" ").replace(/\s+/g," ").trim()).filter(Boolean)}
+function parse(lines){
+  if(!lines.length)return{falha:"Falha na leitura: página sem texto (OCR indisponível nesta versão)"};
+  const tx=lines.join("\n"),hoje=new Date().setHours(0,0,0,0);
+  const m=tx.match(/(?:cliente|nome)\s*[:\-]\s*([^\n]+)/i);
+  const nome=m?m[1].replace(/\s+(cpf|cnpj|tel|fone|cel|end)\b.*$/i,"").trim():"";
+  const tl=lines.find(l=>/tel|fone|cel|whats/i.test(l))||"",tm=tl.match(/(?:\(?\d{2}\)?\s?)?9?\d{4}[-\s]?\d{4}/);
+  const datas=tx.match(/\b\d{2}\/\d{2}\/\d{4}\b/g)||[];
+  return{nome,telefone:tm?tm[0]:"",valores:[...tx.matchAll(/R\$\s?([\d.]+,\d{2})/g)].map(x=>x[1]),datas,parcelas:datas.filter(d=>{const[a,b,c]=d.split("/");return new Date(c,b-1,a)<hoje}).length}
+}
+function valida(c,seen){
+  const t=normTel(c.telefone);c.tel=t;
+  const m=c.falha||(!t?"Contato não localizado":!telOk(t)?(t.length<10?"Número incompleto":"Telefone inválido"):!c.nome?"Dados insuficientes":seen.has(t)?"Possível duplicidade":"");
+  c.status=m?"inconsistente":"ok";c.motivo=m;if(!m)seen.add(t)
+}
+async function importar(files,log){
+  const all=await rq("clients","getAll"),seen=new Set(all.filter(c=>c.status==="ok").map(c=>c.tel));let n=0;
+  for(const f of files){
+    try{
+      if(!window.pdfjsLib)throw new Error("a biblioteca de PDF não carregou");
+      pdfjsLib.GlobalWorkerOptions.workerSrc=WURL;
+      const buf=await f.arrayBuffer(),pdf=await pdfjsLib.getDocument({data:buf.slice(0)}).promise;
+      await rq("pdfs","add",{nome:f.name,blob:new Blob([buf],{type:"application/pdf"}),data:new Date().toISOString(),paginas:pdf.numPages});
+      for(let i=1;i<=pdf.numPages;i++){
+        log(f.name+": página "+i+"/"+pdf.numPages);
+        const c={arquivo:f.name,pagina:i,selecionado:false,importado:new Date().toISOString(),nome:"",telefone:"",valores:[],datas:[],parcelas:0};
+        try{Object.assign(c,parse(await pageLines(await pdf.getPage(i))))}catch(e){c.falha="Falha na leitura: "+e.message}
+        valida(c,seen);await rq("clients","add",c);n++
+      }
+    }catch(e){toast(f.name+": "+e.message)}
+  }
+  return n
+}
+function impPage(){return `<h2>Importação de fichas</h2><div class="card"><label for="pf">Selecione um ou mais PDFs (uma ficha por página)</label><input id="pf" type="file" accept="application/pdf" multiple><p><button class="btn" id="ip">Importar</button></p><p id="lg" style="color:var(--mu);font-size:13px"></p></div><div class="note">Nada é enviado após a importação. A leitura usa o texto digital do PDF; PDFs digitalizados (imagem) ficam como inconsistência, pois o OCR não funciona nesta versão publicada. Os campos são extraídos por padrões e precisam ser conferidos.</div>`}
+function bind_imp(){$("#ip").onclick=async()=>{const f=[...$("#pf").files];if(!f.length)return toast("Escolha ao menos um PDF.");if(!db)return toast("Armazenamento local indisponível.");$("#ip").disabled=true;const lg=t=>{const e=$("#lg");if(e)e.textContent=t};const n=await importar(f,lg);const b=$("#ip");if(b)b.disabled=false;lg("Concluído: "+n+" página(s) processada(s).");toast("Importação concluída.")}}
+function tabela(list,ed){return `<div class="tw"><table><tr><th>Nome</th><th>Telefone</th><th>Parcelas venc.</th><th>Valores</th><th>Vencimentos</th><th>Origem</th>${ed?"<th>Motivo</th><th></th>":""}</tr>${list.map(c=>`<tr><td>${ed?`<input data-f="nome" data-id="${c.id}" value="${esc(c.nome)}">`:esc(c.nome)}</td><td>${ed?`<input data-f="telefone" data-id="${c.id}" value="${esc(c.telefone||"")}">`:esc(c.telefone)}</td><td>${c.parcelas}</td><td>${esc(c.valores.join(", "))}</td><td>${esc(c.datas.join(", "))}</td><td>${esc(c.arquivo)} p.${c.pagina}</td>${ed?`<td>${esc(c.motivo)}</td><td><button class="btn s" data-s="${c.id}">Salvar</button> <button class="btn s" data-d="${c.id}">Excluir</button></td>`:""}</tr>`).join("")}</table></div>`}
+async function lista(ed){
+  const M=$("#main");
+  if(!db){M.innerHTML="<div class=\"note\">Armazenamento local indisponível.</div>";return}
+  const all=await rq("clients","getAll"),l=all.filter(c=>c.status===(ed?"inconsistente":"ok"));
+  M.innerHTML=`<h2>${ed?"Clientes com inconsistências":"Clientes identificados"}</h2>`+(l.length?tabela(l,ed):`<div class="card">Nenhum registro. Importe PDFs no módulo Importação.</div>`);
+  if(!ed)return;
+  M.querySelectorAll("[data-s]").forEach(b=>b.onclick=async()=>{
+    const id=+b.dataset.s,c=all.find(x=>x.id===id);
+    M.querySelectorAll(`[data-id="${id}"]`).forEach(i=>c[i.dataset.f]=i.value.trim());
+    c.falha="";valida(c,new Set(all.filter(x=>x.status==="ok"&&x.id!==id).map(x=>x.tel)));
+    try{await rq("clients","put",c);toast(c.status==="ok"?"Corrigido: movido para identificados.":"Ainda inconsistente: "+c.motivo)}catch(e){toast("Falha ao salvar: "+e.message)}
+    lista(true)
+  });
+  M.querySelectorAll("[data-d]").forEach(b=>b.onclick=async()=>{
+    if(!b.dataset.c){b.dataset.c=1;b.textContent="Confirmar?";return}
+    try{await rq("clients","delete",+b.dataset.d);toast("Registro excluído.")}catch(e){toast("Falha ao excluir: "+e.message)}
+    lista(true)
+  });
+}
+const fdt=d=>new Date(d).toLocaleString('pt-BR'),sub=(t,n)=>t.split('{nome_cliente}').join(n);
+const cf=(b,f)=>{if(b.dataset.c){f();return}b.dataset.c=1;b.textContent='Confirmar?'};
+async function modelos(){
+ const M=$('#main'),l=await rq('templates','getAll');let eid=null;
+ M.innerHTML=`<h2>Modelos de mensagens</h2><div class='card'><label for='mn'>Nome do modelo</label><input id='mn' maxlength='60'><label for='mt'>Texto (use {nome_cliente})</label><textarea id='mt' rows='4'></textarea><p><button class='btn' id='ms'>Salvar modelo</button></p><p id='mp' style='color:var(--mu);font-size:13px;white-space:pre-wrap'></p></div>`+l.map(t=>`<div class='card' style='margin-top:8px'><b>${esc(t.nome)}</b><p style='white-space:pre-wrap'>${esc(sub(t.texto,'Maria'))}</p><button class='btn s' data-e='${t.id}'>Editar</button> <button class='btn s' data-x='${t.id}'>Excluir</button></div>`).join('');
+ $('#mt').oninput=()=>$('#mp').textContent='Prévia: '+sub($('#mt').value,'Maria');
+ $('#ms').onclick=async()=>{const n=$('#mn').value.trim(),x=$('#mt').value.trim();if(!n||!x)return toast('Informe nome e texto.');const o={nome:n,texto:x};if(eid)o.id=eid;try{await rq('templates','put',o);toast('Modelo salvo.');modelos()}catch(e){toast('Falha: '+e.message)}};
+ M.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{const t=l.find(y=>y.id===+b.dataset.e);eid=t.id;$('#mn').value=t.nome;$('#mt').value=t.texto;$('#mt').oninput()});
+ M.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>cf(b,async()=>{try{await rq('templates','delete',+b.dataset.x);toast('Modelo excluído.');modelos()}catch(e){toast('Falha: '+e.message)}}))
+}
+async function dest(){
+ const M=$('#main'),cs=(await rq('clients','getAll')).filter(c=>c.status==='ok'),h=await rq('history','getAll');
+ const ult=t=>h.filter(x=>x.tel===t).sort((a,b)=>a.data<b.data?1:-1)[0],cont=c=>h.some(x=>x.tel===c.tel&&x.status==='Enviado')&&!c.liberado;
+ M.innerHTML=`<h2>Seleção de destinatários</h2><p><button class='btn s' id='sa'>Selecionar todos</button> <button class='btn s' id='sn'>Remover seleção</button> <span class='tag'>${cs.filter(c=>c.selecionado).length} selecionado(s)</span></p>`+(cs.length?`<div class='tw'><table><tr><th></th><th>Nome</th><th>Telefone</th><th>Parcelas</th><th>Valores</th><th>Último contato</th></tr>${cs.map(c=>{const u=ult(c.tel),b=cont(c);return `<tr><td><input type='checkbox' data-k='${c.id}' ${c.selecionado?'checked':''} ${b?'disabled':''}></td><td>${esc(c.nome)}</td><td>${esc(c.telefone)}</td><td>${c.parcelas}</td><td>${esc(c.valores.join(', '))}</td><td>${u?esc(fdt(u.data)+' · '+u.status):'—'} ${b?`<button class='btn s' data-l='${c.id}'>Liberar novo envio</button>`:''}</td></tr>`}).join('')}</table></div>`:`<div class='card'>Nenhum cliente identificado.</div>`)+`<div class='note'>Clientes já contatados (telefone com envio registrado) ficam bloqueados até você liberar manualmente.</div>`;
+ M.querySelectorAll('[data-k]').forEach(i=>i.onchange=async()=>{const c=cs.find(x=>x.id===+i.dataset.k);c.selecionado=i.checked;await rq('clients','put',c);dest()});
+ const all=async v=>{for(const c of cs)if(!v||!cont(c)){c.selecionado=v;await rq('clients','put',c)}dest()};
+ $('#sa').onclick=()=>all(true);$('#sn').onclick=()=>all(false);
+ M.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>cf(b,async()=>{const c=cs.find(x=>x.id===+b.dataset.l);c.liberado=true;await rq('clients','put',c);toast('Novo envio liberado.');dest()}))
+}
+const Q={run:false,it:[],i:0,pause:false,wait:0,hid:null,tpl:null,camp:'',mn:30,mx:60};
+setInterval(()=>{if(!Q.run||Q.wait<=0)return;Q.wait--;const w=$('#qw');if(cur==='fila'&&w){if(Q.wait>0)w.textContent='Aguarde '+Q.wait+'s';else fila()}},1000);
+async function fila(){
+ const M=$('#main');
+ if(Q.run)return qrun(M);
+ const T=await rq('templates','getAll'),cs=(await rq('clients','getAll')).filter(c=>c.status==='ok'&&c.selecionado);
+ M.innerHTML='<h2>Fila de envios</h2>'+(!T.length?`<div class='note'>Crie um modelo em Modelos de mensagens.</div>`:!cs.length?`<div class='note'>Nenhum destinatário selecionado.</div>`:`<div class='card'><label for='qt'>Modelo</label><select id='qt'>${T.map(t=>`<option value='${t.id}'>${esc(t.nome)}</option>`).join('')}</select><label for='q1'>Intervalo mínimo (s)</label><input id='q1' type='number' value='30' min='5'><label for='q2'>Intervalo máximo (s)</label><input id='q2' type='number' value='60' min='5'><p>${cs.length} destinatário(s) selecionado(s).</p><button class='btn' id='qa'>Autorizar e iniciar campanha</button></div>`)+`<div class='note'>Envio um a um: o WhatsApp abre em nova aba com a mensagem pronta; você envia lá e confirma aqui. O sistema não consegue verificar o envio sozinho, então só registra como enviado o que você confirmar.</div>`;
+ const a=$('#qa');if(a)a.onclick=()=>cf(a,async()=>{const t=T.find(x=>x.id===+$('#qt').value),mn=Math.max(5,+$('#q1').value||30),mx=Math.max(mn,+$('#q2').value||60);const id=await rq('campaigns','add',{data:new Date().toISOString(),modelo:t.nome,total:cs.length});Object.assign(Q,{run:true,it:cs,i:0,pause:false,wait:0,hid:null,tpl:t,camp:'Campanha '+id,mn,mx});fila()})
+}
+function qrun(M){
+ if(Q.i>=Q.it.length){Q.run=false;M.innerHTML=`<h2>Fila de envios</h2><div class='card'>Campanha concluída: ${Q.it.length} cliente(s) processado(s).</div>`;return}
+ const c=Q.it[Q.i],msg=sub(Q.tpl.texto,c.nome),op=Q.hid!==null;
+ M.innerHTML=`<h2>Fila de envios</h2><div class='card'><span class='tag'>${Q.camp} · ${Q.i+1}/${Q.it.length}${Q.pause?' · pausada':''}</span><p><b>${esc(c.nome)}</b> · ${esc(c.telefone)}</p><p style='white-space:pre-wrap'>${esc(msg)}</p>`+(op?`<button class='btn' id='qo'>Confirmei o envio</button> <button class='btn s' id='qf'>Falhou</button>`:`<button class='btn' id='qw' ${Q.pause||Q.wait>0?'disabled':''}>${Q.wait>0?'Aguarde '+Q.wait+'s':'Abrir WhatsApp'}</button>`)+` <button class='btn s' id='qp'>${Q.pause?'Continuar':'Pausar'}</button> <button class='btn s' id='qc'>Cancelar</button></div>`;
+ const fin=async(st,er)=>{try{const h=await rq('history','get',Q.hid);h.status=st;h.erro=er||'';await rq('history','put',h);if(st==='Enviado'){c.selecionado=false;c.liberado=false;await rq('clients','put',c)}}catch(e){toast('Falha ao registrar: '+e.message)}Q.hid=null;Q.i++;Q.wait=Math.round(Q.mn+Math.random()*(Q.mx-Q.mn));fila()};
+ const w=$('#qw');if(w)w.onclick=async()=>{window.open('https://wa.me/55'+c.tel+'?text='+encodeURIComponent(msg),'_blank','noopener');try{Q.hid=await rq('history','add',{clienteId:c.id,nome:c.nome,tel:c.tel,data:new Date().toISOString(),mensagem:msg,campanha:Q.camp,status:'Aguardando',erro:''})}catch(e){toast('Falha ao registrar: '+e.message)}fila()};
+ const o=$('#qo');if(o){o.onclick=()=>fin('Enviado');$('#qf').onclick=()=>fin('Falha','Informado pelo operador')}
+ $('#qp').onclick=()=>{Q.pause=!Q.pause;fila()};
+ const k=$('#qc');k.onclick=()=>cf(k,async()=>{try{if(Q.hid!==null){const h=await rq('history','get',Q.hid);h.status='Interrompido';await rq('history','put',h);Q.hid=null}}catch(e){}Q.run=false;toast('Campanha cancelada.');fila()})
+}
+async function hist(){
+ const M=$('#main'),h=(await rq('history','getAll')).sort((a,b)=>a.data<b.data?1:-1);
+ M.innerHTML=`<h2>Histórico de cobranças</h2><div class='grid'><input id='hf' placeholder='Cliente, telefone ou campanha'><select id='hs'><option value=''>Todas as situações</option>${['Aguardando','Enviado','Falha','Interrompido'].map(s=>`<option>${s}</option>`).join('')}</select><input id='h1' type='date' aria-label='De'><input id='h2' type='date' aria-label='Até'></div><div id='ht' style='margin-top:10px'></div>`;
+ const d=()=>{const q=$('#hf').value.toLowerCase(),s=$('#hs').value,a=$('#h1').value,b=$('#h2').value,l=h.filter(x=>(!q||(x.nome+x.tel+x.campanha).toLowerCase().includes(q))&&(!s||x.status===s)&&(!a||x.data.slice(0,10)>=a)&&(!b||x.data.slice(0,10)<=b));$('#ht').innerHTML=l.length?`<div class='tw'><table><tr><th>Data</th><th>Cliente</th><th>Telefone</th><th>Campanha</th><th>Situação</th><th>Mensagem</th></tr>${l.map(x=>`<tr><td>${esc(fdt(x.data))}</td><td>${esc(x.nome)}</td><td>${esc(x.tel)}</td><td>${esc(x.campanha)}</td><td>${esc(x.status)}${x.erro?' · '+esc(x.erro):''}</td><td>${esc(x.mensagem)}</td></tr>`).join('')}</table></div>`:`<div class='card'>Nenhum registro.</div>`};
+ ['hf','hs','h1','h2'].forEach(i=>$('#'+i).oninput=d);d()
+}
+let cse='75e741154bfef46ab';
+const cseBox=()=>cse?`<div class='card' style='margin-bottom:10px'><div class='gcse-search'></div></div>`:`<div class='note'>Para pesquisar no Google aqui dentro, crie seu mecanismo de pesquisa gratuito e cole o ID em Configurações.</div>`;
+function initCSE(){if(!cse)return;if(window.google&&google.search&&google.search.cse)google.search.cse.element.go();else if(!document.getElementById('cse-s')){const s=document.createElement('script');s.id='cse-s';s.async=true;s.src='https://cse.google.com/cse.js?cx='+encodeURIComponent(cse);s.onerror=()=>{s.remove();toast('Não foi possível carregar a pesquisa do Google (sem internet ou bloqueada).')};document.head.appendChild(s)}}
+function cseCard(){return `<div class='card' style='margin-top:10px'><label for='cx'>ID do mecanismo de pesquisa do Google (cx)</label><input id='cx' value='${esc(cse)}' placeholder='Ex.: a1b2c3d4e5f6g7h8i'><p><button class='btn' id='cxs'>Salvar</button></p><p style='font-size:12px;color:var(--mu)'>Crie grátis em programmablesearchengine.google.com, escolha pesquisar em toda a web, copie o ID do mecanismo e cole aqui. A pesquisa funciona no arquivo baixado, com internet.</p></div>`}
+function bind_cse(){$('#cxs').onclick=async()=>{const v=$('#cx').value.trim();if(v&&!/^[\w:.-]+$/.test(v))return toast('ID inválido.');if(!db)return toast('Armazenamento local indisponível.');try{await rq('config','put',{id:'cse',valor:v});cse=v;toast('Salvo.')}catch(e){toast('Falha: '+e.message)}}}
+async function show(){
+  drawNav();const m=MODS.find(x=>x[0]===cur),M=$("#main");
+  if(cur==="painel")M.innerHTML=await painel();
+  else if(cur==="conf"){M.innerHTML=conf()+cseCard();bind_conf();bind_cse()}
+  else if(cur==="nav"){M.innerHTML=navi();bind_nav();initCSE()}
+  else if(cur==="importar"){M.innerHTML=impPage();bind_imp()}
+  else if(cur==="ident")await lista(false);
+  else if(cur==="incons")await lista(true);
+  else if(['modelos','dest','fila','hist'].includes(cur)){if(!db)M.innerHTML='<div class="note">Armazenamento local indisponível.</div>';else try{await({modelos,dest,fila,hist}[cur])()}catch(e){M.innerHTML='<div class="note">Erro: '+esc(e.message)+'</div>'}}
+  else M.innerHTML=pend(m);
+}
+(async()=>{
+  try{db=await openDB();const r=await rq("config","get","empresa");if(r)empresa=r.valor;const x=await rq("config","get","cse");if(x)cse=x.valor}catch(e){dbErr=e.message}
+  drawEmp();show();
+})();
+</script>
+<script>if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(function(){})</script>
+</body>
+</html>

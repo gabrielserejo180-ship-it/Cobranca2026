@@ -1,0 +1,18 @@
+GTS Soluções - Cobrança (versão celular / APK)
+
+PASSO 1 - Colocar no ar (GitHub Pages, grátis)
+1. Crie uma conta em github.com e um repositório NOVO e PÚBLICO (ex.: cobranca).
+2. Envie TODOS os arquivos desta pasta (Add file > Upload files).
+3. Settings > Pages > Source: "Deploy from a branch" > main > / (root) > Save.
+4. Aguarde 1-2 minutos. O endereço será https://SEUUSUARIO.github.io/cobranca/
+   Abra no celular para conferir.
+
+PASSO 2 - Gerar o APK (pwabuilder.com)
+1. Abra pwabuilder.com e cole o endereço acima > Start.
+2. Package for stores > Android > informe um Package ID (ex.: br.com.gts.cobranca) > Generate.
+3. Baixe o zip, extraia e instale o arquivo .apk no celular (permita "instalar apps desconhecidos").
+
+Observações
+- Se aparecer uma barra de endereço no topo do app, é normal; funciona igual.
+- O botão "Abrir WhatsApp" na Fila de envios abre o aplicativo do WhatsApp do celular. Envie lá e volte para confirmar.
+- Os dados ficam só neste celular.
